@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Hello API — Mehul Ranawat</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --border: #222222;
+    --accent: #00ff88;
+    --accent-dim: rgba(0,255,136,0.08);
+    --accent-mid: rgba(0,255,136,0.15);
+    --text: #f0f0f0;
+    --muted: #888888;
+    --code-bg: #161616;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Glow orb */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(0,255,136,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 3rem;
+    background: rgba(10,10,10,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--accent); }
+
+  /* Hero */
+  .hero {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 8rem 2rem 4rem;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--accent-dim);
+    border: 1px solid rgba(0,255,136,0.2);
+    border-radius: 999px;
+    padding: 0.35rem 1rem;
+    font-size: 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  h1 {
+    font-size: clamp(3rem, 8vw, 6.5rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  h1 .accent { color: var(--accent); }
+
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--muted);
+    max-width: 480px;
+    line-height: 1.7;
+    margin-bottom: 3rem;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 2rem;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+  }
+  .btn-primary:hover { background: #00e67a; transform: translateY(-2px); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+
+  /* Terminal demo */
+  .terminal-wrap {
+    position: relative;
+    z-index: 1;
+    margin: 0 auto;
+    max-width: 700px;
+    padding: 0 2rem 5rem;
+    animation: fadeUp 0.6s 0.4s ease both;
+  }
+
+  .terminal {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .terminal-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.75rem 1rem;
+    background: #0e0e0e;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; }
+  .dot-yellow { background: #ffbd2e; }
+  .dot-green { background: #28c840; }
+
+  .terminal-title {
+    flex: 1;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  .terminal-body {
+    padding: 1.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 2;
+  }
+
+  .t-prompt { color: var(--accent); }
+  .t-cmd { color: var(--text); }
+  .t-out { color: var(--muted); }
+  .t-success { color: var(--accent); }
+  .t-url { color: #61dafb; }
+
+  /* Section */
+  section {
+    position: relative;
+    z-index: 1;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 5rem 2rem;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+  }
+
+  .section-desc {
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.7;
+    max-width: 520px;
+    margin-bottom: 3rem;
+  }
+
+  /* Cards grid */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.75rem;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .card:hover {
+    border-color: rgba(0,255,136,0.3);
+    transform: translateY(-4px);
+  }
+
+  .card-icon {
+    width: 42px; height: 42px;
+    background: var(--accent-dim);
+    border: 1px solid rgba(0,255,136,0.2);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+
+  .card h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .card p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* Endpoint table */
+  .endpoint-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+  }
+
+  .endpoint-table th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    color: var(--muted);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .endpoint-table td {
+    padding: 1rem 1rem;
+    border-bottom: 1px solid #161616;
+    vertical-align: middle;
+  }
+
+  .endpoint-table tr:hover td { background: var(--accent-dim); }
+
+  .method {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 5px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    background: rgba(0,255,136,0.12);
+    color: var(--accent);
+    border: 1px solid rgba(0,255,136,0.25);
+  }
+
+  .response-preview {
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+
+  /* Stack pills */
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+
+  .pill {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 1.1rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    transition: border-color 0.2s;
+  }
+
+  .pill:hover { border-color: var(--accent); }
+  .pill-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* Footer */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 2.5rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  footer p { color: var(--muted); font-size: 0.85rem; }
+
+  .footer-link {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .footer-link:hover { color: var(--accent); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Divider */
+  .divider {
+    position: relative;
+    z-index: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 0 2rem;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">HELLO//API</div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#endpoints">Endpoints</a></li>
+    <li><a href="#stack">Stack</a></li>
+    <li><a href="https://github.com/mehul-ranawat/hello-api" target="_blank">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="badge">
+    <span class="badge-dot"></span>
+    Running on localhost:8080
+  </div>
+
+  <h1>Hello,<br/><span class="accent">World.</span></h1>
+
+  <p class="hero-sub">
+    A production-ready REST API built with Spring Boot 3 & Java 21.
+    Clean, fast, and the first of many.
+  </p>
+
+  <div class="hero-actions">
+    <a href="https://github.com/mehul-ranawat/hello-api" target="_blank" class="btn btn-primary">
+      ★ View on GitHub
+    </a>
+    <a href="#endpoints" class="btn btn-ghost">
+      Explore Endpoints ↓
+    </a>
+  </div>
+</div>
+
+<!-- TERMINAL -->
+<div class="terminal-wrap">
+  <div class="terminal">
+    <div class="terminal-bar">
+      <span class="dot dot-red"></span>
+      <span class="dot dot-yellow"></span>
+      <span class="dot dot-green"></span>
+      <span class="terminal-title">hello-api — Spring Boot</span>
+    </div>
+    <div class="terminal-body">
+      <div><span class="t-prompt">$ </span><span class="t-cmd">curl http://localhost:8080/hello</span></div>
+      <div><span class="t-success">→ </span><span class="t-out">"Hello, World!"</span></div>
+      <br/>
+      <div><span class="t-prompt">$ </span><span class="t-cmd">mvn spring-boot:run</span></div>
+      <div><span class="t-out">  .   ____          _            __ _ _</span></div>
+      <div><span class="t-out"> /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \</span></div>
+      <div><span class="t-success">Started HelloApiApplication in 1.616 seconds ✓</span></div>
+      <div><span class="t-out">Tomcat started on port </span><span class="t-url">8080</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ABOUT -->
+<section id="about">
+  <p class="section-label">// about this project</p>
+  <h2 class="section-title">What is Hello API?</h2>
+  <p class="section-desc">
+    A backend REST API — the backbone of modern web apps. When your browser visits a URL,
+    this server receives the request and sends back a response. Think of it as a waiter:
+    you order something, it delivers exactly that.
+  </p>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">🚀</div>
+      <h3>REST Architecture</h3>
+      <p>Uses standard HTTP methods (GET, POST) to serve data — the same pattern used by Instagram, Zomato, and every major app.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">⚡</div>
+      <h3>Spring Boot 3</h3>
+      <p>Industry-standard Java framework. Auto-configures everything so you write business logic, not boilerplate.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">☕</div>
+      <h3>Java 21 LTS</h3>
+      <p>The latest Long-Term Support version of Java — faster, modern syntax, and production-ready for years to come.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📦</div>
+      <h3>Maven Build</h3>
+      <p>Manages all dependencies and builds the project into a single executable JAR file. One command to run anywhere.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ENDPOINTS -->
+<section id="endpoints">
+  <p class="section-label">// api reference</p>
+  <h2 class="section-title">Endpoints</h2>
+  <p class="section-desc">All available routes exposed by this API. Base URL: <code style="color: var(--accent); font-family: 'JetBrains Mono', monospace;">http://localhost:8080</code></p>
+
+  <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden;">
+    <table class="endpoint-table">
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Endpoint</th>
+          <th>Description</th>
+          <th>Response</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="method">GET</span></td>
+          <td><code style="color: var(--text);">/hello</code></td>
+          <td style="color: var(--muted);">Returns greeting message</td>
+          <td class="response-preview">"Hello, World!"</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- STACK -->
+<section id="stack">
+  <p class="section-label">// tech stack</p>
+  <h2 class="section-title">Built with</h2>
+  <p class="section-desc">A modern, production-grade Java stack used by companies like Netflix, Spotify, and Atlassian.</p>
+
+  <div class="stack">
+    <div class="pill"><span class="pill-dot" style="background:#f89820;"></span> Java 21</div>
+    <div class="pill"><span class="pill-dot" style="background:#6db33f;"></span> Spring Boot 3.5</div>
+    <div class="pill"><span class="pill-dot" style="background:#c71a36;"></span> Maven</div>
+    <div class="pill"><span class="pill-dot" style="background:#181717;background:#ffffff;"></span> GitHub</div>
+    <div class="pill"><span class="pill-dot" style="background:#fe2d55;"></span> IntelliJ IDEA</div>
+    <div class="pill"><span class="pill-dot" style="background:#00acd7;"></span> REST API</div>
+  </div>
+</section>
+
+<footer>
+  <p>Built by <strong>Mehul Ranawat</strong> · First Java Project 🎉</p>
+  <a href="https://github.com/mehul-ranawat/hello-api" target="_blank" class="footer-link">
+    ★ mehul-ranawat/hello-api
+  </a>
+</footer>
+
+</body>
+</html>
