@@ -11,7 +11,7 @@ A simple REST API built with Spring Boot 3 + Java 21.
 1. Clone the repo
 2. Open in IntelliJ
 3. Run `HelloApiApplication.java`
-4. Visit `http://localhost:8080/hello`
+4. Visit `http://localhost:8080/`
 
 ## Tech Stack
 - Java 21
